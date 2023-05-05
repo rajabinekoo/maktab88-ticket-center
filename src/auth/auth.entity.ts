@@ -1,13 +1,17 @@
-import { Entity, Column } from 'typeorm';
+import { UserEntity } from 'src/user/user.entity';
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'Sessions' })
 export class SessionEntity {
-  @Column({ nullable: false })
-  userId: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ nullable: false })
   token: string;
 
-  @Column({ nullable: true, default: Date.now() })
-  expireTime: number; // unix timestamp
+  @Column({ nullable: false })
+  expireTime: string; // unix timestamp
+
+  @ManyToOne(() => UserEntity, (user) => user.id)
+  user: UserEntity;
 }

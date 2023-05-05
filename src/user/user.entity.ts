@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { SessionEntity } from 'src/auth/auth.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity({ name: 'User' })
 export class UserEntity {
@@ -13,4 +14,7 @@ export class UserEntity {
 
   @Column({ default: false })
   isAdmin: boolean;
+
+  @OneToMany(() => SessionEntity, (session) => session.user)
+  sessions: SessionEntity[];
 }

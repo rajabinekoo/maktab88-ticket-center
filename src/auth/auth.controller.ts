@@ -10,8 +10,9 @@ import {
 import { CreateUserDto, UserDto } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
 import { UserEntity } from 'src/user/user.entity';
-import { LoginInfoDto } from './auth.dto';
+import { LoginInfoDto, LoginInfoResDto } from './auth.dto';
 import { AuthService } from './auth.service';
+import { SessionEntity } from './auth.entity';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -22,14 +23,17 @@ export class AuthController {
   ) {}
 
   @Post('/login')
-  async login(@Body() loginInfo: LoginInfoDto): Promise<void> {
+  async login(@Body() loginInfo: LoginInfoDto): Promise<LoginInfoResDto> {
     const user: UserEntity = await this.userService.findAllByEmail(
       loginInfo.email,
     );
     if (!user) throw new NotFoundException('User not found');
-    await this.authService.loginByCredentials();
-    // const newUser: UserEntity = await this.userService.createUser(userData);
-    // return new UserDto(newUser);
+    const token: string = await this.authService.generateToken();
+    const newSession: SessionEntity = await this.authService.createSession(
+      token,
+      user,
+    );
+    return new LoginInfoResDto(newSession.user, newSession.token);
   }
 
   @Post('/registration')
