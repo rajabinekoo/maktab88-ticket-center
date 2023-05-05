@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   ConflictException,
   Controller,
+  ForbiddenException,
   NotFoundException,
   Post,
   UseInterceptors,
@@ -13,6 +14,7 @@ import { UserEntity } from 'src/user/user.entity';
 import { LoginInfoDto, LoginInfoResDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { SessionEntity } from './auth.entity';
+import { compare } from 'bcrypt';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,6 +30,9 @@ export class AuthController {
       loginInfo.email,
     );
     if (!user) throw new NotFoundException('User not found');
+    if (!(await compare(loginInfo.password, user.password))) {
+      throw new ForbiddenException();
+    }
     const token: string = await this.authService.generateToken();
     const newSession: SessionEntity = await this.authService.createSession(
       token,
