@@ -23,3 +23,11 @@ export class UserDto {
     Object.assign(this, partial);
   }
 }
+
+export class ResetPasswordInfoDto {
+  @IsNotEmpty()
+  currentPassword: string;
+
+  @IsNotEmpty()
+  newPassword: string;
+}

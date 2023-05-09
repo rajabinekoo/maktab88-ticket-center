@@ -18,7 +18,7 @@ import { AuthorizationMiddleware } from './auth/auth.middleware';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       entities: [UserEntity, SessionEntity],
-      synchronize: true,
+      synchronize: false,
     }),
     AuthModule,
     UserModule,

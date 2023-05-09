@@ -51,7 +51,7 @@ export class AuthService {
 
   private generateExpireTime(): number {
     const date: Date = new Date();
-    date.setMinutes(date.getMinutes() + Number(process.env.EXPIRE_MINUTES));
+    date.setMinutes(date.getMinutes() + Number(30));
     return this.formatExpireTime(date);
   }
 }

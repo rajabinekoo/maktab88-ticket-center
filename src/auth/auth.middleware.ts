@@ -25,7 +25,8 @@ export class AuthorizationMiddleware implements NestMiddleware {
       await this.sessionService.removeSession(session);
       throw new UnauthorizedException();
     }
-    req.res.locals.user = session.user;
+    req.res.locals.session = session;
+
     next();
   }
 }
