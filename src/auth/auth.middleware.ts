@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from 'src/user/user.service';
-import { Redis } from 'ioredis';
-import { ioredis } from './ioredis.service';
+import { IoRedisProvider } from './ioredis.provider';
 
 @Injectable()
 export class AuthorizationMiddleware implements NestMiddleware {
-  private readonly redis: Redis = ioredis;
-
-  constructor(private readonly userSerivce: UserService) {}
+  constructor(
+    private readonly userSerivce: UserService,
+    private readonly redis: IoRedisProvider,
+  ) {}
 
   async use(req: Request, _res: Response, next: NextFunction) {
     const token: string | undefined = req.headers?.authorization?.replace(

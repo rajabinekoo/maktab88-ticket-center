@@ -74,6 +74,6 @@ export class UserController {
     if (!isValidCurrPass) {
       throw new NotAcceptableException('current password is not valid');
     }
-    this.userService.updatePassword(user.id, resetInfo.newPassword);
+    await this.userService.updatePassword(user.id, resetInfo.newPassword);
   }
 }

@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from 'src/user/user.entity';
-import { Redis } from 'ioredis';
-import { ioredis } from './ioredis.service';
+import { IoRedisProvider } from './ioredis.provider';
 
 @Injectable()
 export class AuthService {
-  private readonly redis: Redis = ioredis;
+  constructor(private readonly redis: IoRedisProvider) {}
 
   public async createSession(token: string, user: UserEntity): Promise<void> {
     await this.redis.hset(token, user);
@@ -23,17 +22,11 @@ export class AuthService {
     return token;
   }
 
-  public formatExpireTime(date?: Date): number {
-    return Math.floor((date || new Date()).getTime() / 1000);
-  }
-
   public async removeSession(token: string): Promise<void> {
     await this.redis.hdel(token);
   }
 
   private generateExpireTime(): number {
-    const date: Date = new Date();
-    date.setMinutes(date.getMinutes() + Number(30));
-    return this.formatExpireTime(date);
+    return Number(process.env.EXPIRE_MINUTES) * 60;
   }
 }

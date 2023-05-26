@@ -6,6 +6,8 @@ import { UserModule } from './user/user.module';
 import { UserEntity } from './user/user.entity';
 import { AuthorizationMiddleware } from './auth/auth.middleware';
 import { GatewayModule } from './gateway/gateway.module';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 
 @Module({
   imports: [
@@ -19,6 +21,12 @@ import { GatewayModule } from './gateway/gateway.module';
       database: process.env.DATABASE_NAME,
       entities: [UserEntity],
       synchronize: true,
+    }),
+    WinstonModule.forRoot({
+      format: winston.format.json(),
+      transports: [
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+      ],
     }),
     AuthModule,
     UserModule,
