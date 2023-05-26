@@ -4,12 +4,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { AuthService } from './auth.service';
-import { SessionEntity } from './auth.entity';
+import { UserService } from 'src/user/user.service';
+import { Redis } from 'ioredis';
+import { ioredis } from './ioredis.service';
 
 @Injectable()
 export class AuthorizationMiddleware implements NestMiddleware {
-  constructor(private readonly sessionService: AuthService) {}
+  private readonly redis: Redis = ioredis;
+
+  constructor(private readonly userSerivce: UserService) {}
 
   async use(req: Request, _res: Response, next: NextFunction) {
     const token: string | undefined = req.headers?.authorization?.replace(
@@ -17,15 +20,14 @@ export class AuthorizationMiddleware implements NestMiddleware {
       '',
     );
     if (!token) throw new UnauthorizedException();
-    const session: SessionEntity = await this.sessionService.findSessionByToken(
-      token,
-    );
-    if (!session) throw new UnauthorizedException();
-    if (Number(session.expireTime) < this.sessionService.formatExpireTime()) {
-      await this.sessionService.removeSession(session);
-      throw new UnauthorizedException();
-    }
-    req.res.locals.session = session;
+
+    const id: string = await this.redis.hget(token, 'id');
+    if (!id) throw new UnauthorizedException();
+
+    const user = await this.userSerivce.findUserById(Number(id));
+    if (!user) throw new UnauthorizedException();
+
+    req.res.locals.user = user;
 
     next();
   }

@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { UserEntity } from './user/user.entity';
-import { SessionEntity } from './auth/auth.entity';
 import { AuthorizationMiddleware } from './auth/auth.middleware';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -17,11 +17,12 @@ import { AuthorizationMiddleware } from './auth/auth.middleware';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [UserEntity, SessionEntity],
-      synchronize: false,
+      entities: [UserEntity],
+      synchronize: true,
     }),
     AuthModule,
     UserModule,
+    GatewayModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -13,7 +13,6 @@ import { UserService } from 'src/user/user.service';
 import { UserEntity } from 'src/user/user.entity';
 import { LoginInfoDto, LoginInfoResDto } from './auth.dto';
 import { AuthService } from './auth.service';
-import { SessionEntity } from './auth.entity';
 import { compare } from 'bcrypt';
 
 @Controller('auth')
@@ -34,11 +33,8 @@ export class AuthController {
       throw new ForbiddenException();
     }
     const token: string = await this.authService.generateToken();
-    const newSession: SessionEntity = await this.authService.createSession(
-      token,
-      user,
-    );
-    return new LoginInfoResDto(newSession.user, newSession.token);
+    await this.authService.createSession(token, user);
+    return new LoginInfoResDto(user, token);
   }
 
   @Post('/registration')

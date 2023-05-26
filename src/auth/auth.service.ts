@@ -1,42 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { SessionEntity } from './auth.entity';
 import { UserEntity } from 'src/user/user.entity';
+import { Redis } from 'ioredis';
+import { ioredis } from './ioredis.service';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(SessionEntity)
-    private sessionRepository: Repository<SessionEntity>,
-  ) {}
+  private readonly redis: Redis = ioredis;
 
-  public async findSessionByToken(token: string): Promise<SessionEntity> {
-    return this.sessionRepository.findOne({
-      relations: { user: true },
-      where: { token },
-    });
-  }
-
-  public async createSession(
-    token: string,
-    user: UserEntity,
-  ): Promise<SessionEntity> {
-    const newSession: SessionEntity = await this.sessionRepository.create({
-      user,
-      token,
-      expireTime: String(this.generateExpireTime()),
-    });
-    return this.sessionRepository.save(newSession);
+  public async createSession(token: string, user: UserEntity): Promise<void> {
+    await this.redis.hset(token, user);
+    await this.redis.expire(token, this.generateExpireTime());
   }
 
   public async generateToken(): Promise<string> {
     let token: string = uuidv4();
-    let targetSession: SessionEntity = await this.findSessionByToken(token);
-    while (!!targetSession) {
+    let userId: string = await this.redis.hget(token, 'id');
+    while (!!userId) {
       token = uuidv4();
-      targetSession = await this.findSessionByToken(token);
+      userId = await this.redis.hget(token, 'id');
     }
     return token;
   }
@@ -45,8 +27,8 @@ export class AuthService {
     return Math.floor((date || new Date()).getTime() / 1000);
   }
 
-  public async removeSession(session: SessionEntity): Promise<void> {
-    await this.sessionRepository.delete({ id: session.id });
+  public async removeSession(token: string): Promise<void> {
+    await this.redis.hdel(token);
   }
 
   private generateExpireTime(): number {

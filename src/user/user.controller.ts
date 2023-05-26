@@ -1,4 +1,4 @@
-import { hash, compare } from 'bcrypt';
+import { compare } from 'bcrypt';
 import {
   Body,
   ClassSerializerInterceptor,
@@ -21,7 +21,7 @@ export class UserController {
 
   @Get()
   getProfile(@Req() req: RequestType): UserDto {
-    const user: UserEntity = req.res.locals.session.user;
+    const user: UserEntity = req.res.locals.user;
     return new UserDto(user);
   }
 
@@ -30,7 +30,7 @@ export class UserController {
     @Req() req: RequestType,
     @Body() resetInfo: ResetPasswordInfoDto,
   ) {
-    const user: UserEntity = req.res.locals.session.user;
+    const user: UserEntity = req.res.locals.user;
     const isValidCurrPass = await compare(
       resetInfo.currentPassword,
       user.password,
