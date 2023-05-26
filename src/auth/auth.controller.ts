@@ -14,8 +14,10 @@ import { UserEntity } from 'src/user/user.entity';
 import { LoginInfoDto, LoginInfoResDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { compare } from 'bcrypt';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiTags('authentication')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(
